@@ -1,11 +1,9 @@
 use std::cell::RefCell;
 
-use windows::Foundation::Uri;
-use windows::core::{HSTRING, Result, h};
+use windows::core::{HSTRING, Result};
 use winui3::{
     Microsoft::UI::Xaml::{
         Application, Controls::XamlControlsResources, LaunchActivatedEventArgs, Markup::IXamlType,
-        ResourceDictionary,
     },
     XamlApp, XamlAppOverrides,
 };
@@ -36,12 +34,6 @@ impl XamlAppOverrides for App {
         let merged_dictionaries = resources.MergedDictionaries()?;
         let xaml_controls_resources = XamlControlsResources::new()?;
         merged_dictionaries.Append(&xaml_controls_resources)?;
-
-        let compact_resources = ResourceDictionary::new()?;
-        compact_resources.SetSource(&Uri::CreateUri(h!(
-            "ms-appx:///Microsoft.UI.Xaml/DensityStyles/Compact.xaml"
-        ))?)?;
-        merged_dictionaries.Append(&compact_resources)?;
 
         let window = MainWindow::new()?;
         window.InitializeComponent()?;
