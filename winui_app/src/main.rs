@@ -1,10 +1,11 @@
 #![windows_subsystem = "console"]
 
 mod app;
-mod main_page;
+mod hash_page;
 mod main_window;
 mod settings_page;
 mod utils;
+mod verify_page;
 
 use windows::core::{IInspectable, Ref, Result};
 use winui3::{

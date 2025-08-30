@@ -8,10 +8,11 @@ use windows::{
 use winui3::{
     Microsoft::UI::Xaml::{
         Controls::*,
+        Data::{Binding, BindingMode},
         GridLengthHelper, GridUnitType,
         Media::MicaBackdrop,
         Navigation::{NavigatedEventHandler, NavigationEventArgs},
-        Window,
+        PropertyPath, Window,
     },
     xaml_typename,
 };
@@ -47,11 +48,15 @@ impl MainWindow {
         )?)?;
         row_definitions.Append(&row1)?;
 
+        let title_icon = FontIconSource::new()?;
+        title_icon.SetGlyph(h!("\u{F28B}"))?;
+
         let titlebar = TitleBar::new()?;
-        titlebar.SetTitle(h!("Hasher"))?;
         titlebar.SetIsBackButtonVisible(true)?;
         titlebar.SetIsPaneToggleButtonVisible(true)?;
         titlebar.SetIsBackButtonEnabled(false)?;
+        titlebar.SetIconSource(&title_icon)?;
+        titlebar.SetTitle(h!("Rusthashio"))?;
         Grid::SetRow(&titlebar, 0)?;
         grid_children.Append(&titlebar)?;
 
@@ -61,22 +66,37 @@ impl MainWindow {
         Grid::SetRow(&nav_view, 1)?;
         grid_children.Append(&nav_view)?;
 
-        let home_icon = SymbolIcon::new()?;
-        home_icon.SetSymbol(Symbol::Home)?;
+        let hash_icon = FontIcon::new()?;
+        hash_icon.SetGlyph(h!("\u{E8A6}"))?;
 
-        let home_item = NavigationViewItem::new()?;
-        home_item.SetContent(&hstring_reference(h!("Home"))?)?;
-        home_item.SetTag(&hstring_reference(h!("HomePage"))?)?;
-        home_item.SetIcon(&home_icon)?;
-        nav_view.MenuItems()?.Append(&home_item)?;
+        let hash_item = NavigationViewItem::new()?;
+        hash_item.SetContent(&hstring_reference(h!("Hash"))?)?;
+        hash_item.SetTag(&hstring_reference(h!("HashPage"))?)?;
+        hash_item.SetIcon(&hash_icon)?;
+        nav_view.MenuItems()?.Append(&hash_item)?;
+
+        let verify_icon = FontIcon::new()?;
+        verify_icon.SetGlyph(h!("\u{E9D5}"))?;
+
+        let verify_item = NavigationViewItem::new()?;
+        verify_item.SetContent(&hstring_reference(h!("Verify"))?)?;
+        verify_item.SetTag(&hstring_reference(h!("VerifyPage"))?)?;
+        verify_item.SetIcon(&verify_icon)?;
+        nav_view.MenuItems()?.Append(&verify_item)?;
 
         let frame = Frame::new()?;
         nav_view.SetContent(&frame)?;
 
+        let binding = Binding::new()?;
+        binding.SetSource(&frame.cast::<IInspectable>()?)?;
+        binding.SetPath(&PropertyPath::CreateInstance(h!("CanGoBack"))?)?;
+        binding.SetMode(BindingMode::OneWay)?;
+
+        titlebar.SetBinding(&TitleBar::IsBackButtonEnabledProperty()?, &binding)?;
+
         {
             let frame_clone = frame.clone();
             let nav_view_clone = nav_view.clone();
-            let titlebar_clone = titlebar.clone();
 
             frame.Navigated(&NavigatedEventHandler::new(
                 move |_sender: Ref<'_, IInspectable>,
@@ -104,8 +124,6 @@ impl MainWindow {
                         }
                     }
 
-                    // Set titlebar back button state
-                    titlebar_clone.SetIsBackButtonEnabled(frame_clone.CanGoBack()?)?;
                     Ok(())
                 },
             ))?;
@@ -155,7 +173,7 @@ impl MainWindow {
             ))?;
         }
 
-        nav_view.SetSelectedItem(&home_item)?;
+        nav_view.SetSelectedItem(&hash_item)?;
 
         self.SetContent(&grid)?;
 

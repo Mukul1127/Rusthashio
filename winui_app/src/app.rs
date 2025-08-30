@@ -10,9 +10,10 @@ use winui3::{
     XamlApp, XamlAppOverrides,
 };
 
-use crate::main_page::MainPage;
+use crate::hash_page::HashPage;
 use crate::main_window::MainWindow;
 use crate::settings_page::SettingsPage;
+use crate::verify_page::VerifyPage;
 
 pub(crate) struct App {
     window: RefCell<Option<MainWindow>>,
@@ -52,7 +53,8 @@ impl XamlAppOverrides for App {
 
     fn TryResolveXamlType(&self, full_name: &HSTRING) -> Result<IXamlType> {
         match full_name.to_string().as_str() {
-            "HomePage" => winui3::XamlCustomType::<MainPage>::new(full_name),
+            "HashPage" => winui3::XamlCustomType::<HashPage>::new(full_name),
+            "VerifyPage" => winui3::XamlCustomType::<VerifyPage>::new(full_name),
             "SettingsPage" => winui3::XamlCustomType::<SettingsPage>::new(full_name),
             _ => Err(windows::core::Error::empty()),
         }
