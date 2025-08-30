@@ -10,10 +10,10 @@ use winui3::{
     XamlApp, XamlAppOverrides,
 };
 
-use crate::hash_page::HashPage;
 use crate::main_window::MainWindow;
-use crate::settings_page::SettingsPage;
-use crate::verify_page::VerifyPage;
+use crate::pages::hash_page::HashPage;
+use crate::pages::settings_page::SettingsPage;
+use crate::pages::verify_page::VerifyPage;
 
 pub(crate) struct App {
     window: RefCell<Option<MainWindow>>,
