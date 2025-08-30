@@ -6,7 +6,7 @@ use std::{
 };
 use windows::{
     Foundation::TypedEventHandler,
-    core::{IInspectable, Interface, Ref, Result, h},
+    core::{HSTRING, IInspectable, Interface, Ref, Result, h},
 };
 use winui3::{
     Microsoft::UI::Xaml::{
@@ -22,7 +22,7 @@ use winui3::{
         Navigation::{NavigatedEventHandler, NavigationEventArgs},
         PropertyPath, Window,
     },
-    xaml_typename,
+    Windows::UI::Xaml::Interop::{TypeKind, TypeName},
 };
 
 pub(crate) struct MainWindow {
@@ -229,7 +229,10 @@ impl MainWindow {
                     let args = args.as_ref().expect("args should not be None");
                     if args.IsSettingsSelected()? {
                         // Navigate to SettingsPage
-                        let page_type = xaml_typename("SettingsPage");
+                        let page_type = TypeName {
+                            Name: HSTRING::from("SettingsPage"),
+                            Kind: TypeKind::Custom,
+                        };
                         frame_clone.Navigate2(&page_type)?;
                     } else if let Ok(selected_item) = args.SelectedItemContainer() {
                         // Navigate to tag
