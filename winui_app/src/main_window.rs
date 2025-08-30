@@ -1,15 +1,23 @@
 use crate::utils::{hstring_reference, view_item_to_type};
 
-use std::ops::Deref;
+use std::{
+    ops::Deref,
+    sync::{Arc, Mutex},
+};
 use windows::{
     Foundation::TypedEventHandler,
     core::{IInspectable, Interface, Ref, Result, h},
 };
 use winui3::{
     Microsoft::UI::Xaml::{
-        Controls::*,
+        Controls::{
+            FontIcon, FontIconSource, Frame, Grid, NavigationView, NavigationViewBackButtonVisible,
+            NavigationViewDisplayMode, NavigationViewDisplayModeChangedEventArgs,
+            NavigationViewItem, NavigationViewSelectionChangedEventArgs, RowDefinition, TitleBar,
+        },
         Data::{Binding, BindingMode},
-        GridLengthHelper, GridUnitType,
+        DataTemplate, GridLengthHelper, GridUnitType,
+        Markup::XamlReader,
         Media::MicaBackdrop,
         Navigation::{NavigatedEventHandler, NavigationEventArgs},
         PropertyPath, Window,
@@ -93,6 +101,66 @@ impl MainWindow {
         binding.SetMode(BindingMode::OneWay)?;
 
         titlebar.SetBinding(&TitleBar::IsBackButtonEnabledProperty()?, &binding)?;
+
+        // Fix for https://github.com/microsoft/microsoft-ui-xaml/issues/9789
+        {
+            let nav_view_clone = nav_view.clone();
+
+            let previous_mode = Arc::new(Mutex::new(NavigationViewDisplayMode::Expanded));
+            {
+                let previous_mode = previous_mode.clone();
+                nav_view.DisplayModeChanged(&TypedEventHandler::new(
+                    move |_sender: Ref<'_, NavigationView>,
+                          args: Ref<'_, NavigationViewDisplayModeChangedEventArgs>|
+                          -> windows::core::Result<()> {
+                        let args = args.as_ref().expect("args should not be None");
+                        let new_mode = args.DisplayMode()?;
+
+                        // Lock previous_mode safely
+                        let mut prev = previous_mode.lock().unwrap();
+
+                        if *prev != NavigationViewDisplayMode::Minimal
+                            && new_mode == NavigationViewDisplayMode::Minimal
+                        {
+                            log::debug!("Entered Minimal Mode");
+
+                            let xaml = h!(r#"
+                                <DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                                    <TextBlock
+                                        Text="{Binding}"
+                                        Margin="80,0,0,0"
+                                        Style="{StaticResource TitleTextBlockStyle}"/>
+                                </DataTemplate>
+                            "#);
+                            let template = XamlReader::Load(&xaml)?.cast::<DataTemplate>()?;
+
+                            nav_view_clone.SetHeaderTemplate(&template)?;
+                        }
+
+                        if *prev == NavigationViewDisplayMode::Minimal
+                            && new_mode != NavigationViewDisplayMode::Minimal
+                        {
+                            log::debug!("Exited Minimal Mode");
+
+                            let xaml = h!(r#"
+                                <DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                                    <TextBlock
+                                        Text="{Binding}"
+                                        Style="{StaticResource TitleTextBlockStyle}"/>
+                                </DataTemplate>
+                            "#);
+                            let template = XamlReader::Load(&xaml)?.cast::<DataTemplate>()?;
+
+                            nav_view_clone.SetHeaderTemplate(&template)?;
+                        }
+
+                        *prev = new_mode;
+
+                        Ok(())
+                    },
+                ))?;
+            }
+        }
 
         {
             let frame_clone = frame.clone();
