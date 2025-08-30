@@ -1,4 +1,4 @@
-use crate::utils::{hstring_reference, view_item_to_type};
+use crate::{string_to_iinspectable, utils::view_item_to_type};
 
 use std::{
     ops::Deref,
@@ -78,8 +78,8 @@ impl MainWindow {
         hash_icon.SetGlyph(h!("\u{E8A6}"))?;
 
         let hash_item = NavigationViewItem::new()?;
-        hash_item.SetContent(&hstring_reference(h!("Hash"))?)?;
-        hash_item.SetTag(&hstring_reference(h!("HashPage"))?)?;
+        hash_item.SetContent(&string_to_iinspectable!("Hash")?)?;
+        hash_item.SetTag(&string_to_iinspectable!("HashPage")?)?;
         hash_item.SetIcon(&hash_icon)?;
         nav_view.MenuItems()?.Append(&hash_item)?;
 
@@ -87,8 +87,8 @@ impl MainWindow {
         verify_icon.SetGlyph(h!("\u{E9D5}"))?;
 
         let verify_item = NavigationViewItem::new()?;
-        verify_item.SetContent(&hstring_reference(h!("Verify"))?)?;
-        verify_item.SetTag(&hstring_reference(h!("VerifyPage"))?)?;
+        verify_item.SetContent(&string_to_iinspectable!("Verify")?)?;
+        verify_item.SetTag(&string_to_iinspectable!("VerifyPage")?)?;
         verify_item.SetIcon(&verify_icon)?;
         nav_view.MenuItems()?.Append(&verify_item)?;
 
@@ -174,7 +174,7 @@ impl MainWindow {
                     if let Ok(source_page_type) = frame_clone.SourcePageType() {
                         if source_page_type.Name == "SettingsPage" {
                             nav_view_clone.SetSelectedItem(&nav_view_clone.SettingsItem()?)?;
-                            nav_view_clone.SetHeader(&hstring_reference(h!("Settings"))?)?;
+                            nav_view_clone.SetHeader(&string_to_iinspectable!("Settings")?)?;
                         } else {
                             // Match menu item by tag (FullName equivalent)
                             let menu_items = nav_view_clone.MenuItems()?;

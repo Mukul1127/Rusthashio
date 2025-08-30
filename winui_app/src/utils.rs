@@ -1,6 +1,6 @@
 use windows::{
-    Foundation::{IPropertyValue, IReference, PropertyValue},
-    core::{HSTRING, Interface, Result},
+    Foundation::IPropertyValue,
+    core::{Interface, Result},
 };
 use winui3::{
     Microsoft::UI::Xaml::Controls::NavigationViewItem,
@@ -11,13 +11,15 @@ pub(crate) fn view_item_to_type(view_item: &NavigationViewItem) -> Result<TypeNa
     let tag = view_item.Tag()?;
     let prop_value = tag.cast::<IPropertyValue>()?;
     let tag_hstr = prop_value.GetString()?;
-    let page_type = TypeName {
+    Ok(TypeName {
         Name: tag_hstr,
         Kind: TypeKind::Custom,
-    };
-    Ok(page_type)
+    })
 }
 
-pub(crate) fn hstring_reference(text: &HSTRING) -> Result<IReference<HSTRING>> {
-    PropertyValue::CreateString(text)?.cast()
+#[macro_export]
+macro_rules! string_to_iinspectable {
+    ($text:expr) => {
+        windows::Foundation::PropertyValue::CreateString(windows::core::h!($text))
+    };
 }
