@@ -1,8 +1,8 @@
-use windows::core::{IInspectable, Result};
+use windows::core::{IInspectable, Result, h};
 use winui3::{
     Activatable,
     Microsoft::UI::Xaml::{
-        Controls::Page,
+        Controls::{Page, TextBlock},
         Navigation::{NavigatingCancelEventArgs, NavigationEventArgs},
     },
     XamlPage, XamlPageOverrides,
@@ -25,8 +25,14 @@ impl XamlPageOverrides for SettingsPage {
         Ok(())
     }
 
-    fn OnNavigatedTo(&self, _page: &Page, _args: Option<&NavigationEventArgs>) -> Result<()> {
+    fn OnNavigatedTo(&self, page: &Page, _args: Option<&NavigationEventArgs>) -> Result<()> {
         log::debug!("OnNavigatedTo");
+
+        let textblock = TextBlock::new()?;
+        textblock.SetText(h!("Hi from Settings Page!"))?;
+
+        page.SetContent(&textblock)?;
+
         Ok(())
     }
 

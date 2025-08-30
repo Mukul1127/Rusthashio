@@ -1,30 +1,14 @@
 use windows::{
     Foundation::{IPropertyValue, IReference, PropertyValue},
-    core::{HSTRING, IInspectable, Interface, Result},
+    core::{HSTRING, Interface, Result},
 };
 use winui3::{
-    Microsoft::UI::Xaml::Controls::{NavigationViewItem, NavigationViewItemBase},
+    Microsoft::UI::Xaml::Controls::NavigationViewItem,
     Windows::UI::Xaml::Interop::{TypeKind, TypeName},
 };
 
-pub trait HasTag {
-    fn get_tag(&self) -> Result<IInspectable>;
-}
-
-impl HasTag for NavigationViewItem {
-    fn get_tag(&self) -> Result<IInspectable> {
-        self.Tag()
-    }
-}
-
-impl HasTag for NavigationViewItemBase {
-    fn get_tag(&self) -> Result<IInspectable> {
-        self.Tag()
-    }
-}
-
-pub(crate) fn view_item_to_type<T: HasTag>(view_item: &T) -> Result<TypeName> {
-    let tag = view_item.get_tag()?;
+pub(crate) fn view_item_to_type(view_item: &NavigationViewItem) -> Result<TypeName> {
+    let tag = view_item.Tag()?;
     let prop_value = tag.cast::<IPropertyValue>()?;
     let tag_hstr = prop_value.GetString()?;
     let page_type = TypeName {

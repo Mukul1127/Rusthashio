@@ -179,7 +179,7 @@ impl MainWindow {
                             // Match menu item by tag (FullName equivalent)
                             let menu_items = nav_view_clone.MenuItems()?;
                             for item in menu_items.into_iter() {
-                                let nv_item: NavigationViewItem = item.cast()?;
+                                let nv_item = item.cast::<NavigationViewItem>()?;
                                 let page_type = view_item_to_type(&nv_item)?;
                                 if page_type == frame_clone.SourcePageType()? {
                                     nav_view_clone.SetSelectedItem(&item)?;
@@ -234,9 +234,10 @@ impl MainWindow {
                             Kind: TypeKind::Custom,
                         };
                         frame_clone.Navigate2(&page_type)?;
-                    } else if let Ok(selected_item) = args.SelectedItemContainer() {
+                    } else if let Ok(selected_item) = args.SelectedItem() {
                         // Navigate to tag
-                        let page_type = view_item_to_type(&selected_item)?;
+                        let item = selected_item.cast::<NavigationViewItem>()?;
+                        let page_type = view_item_to_type(&item)?;
                         frame_clone.Navigate2(&page_type)?;
                     }
                     Ok(())
