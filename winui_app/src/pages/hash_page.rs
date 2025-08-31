@@ -12,8 +12,7 @@ pub struct HashPage;
 
 impl Activatable for HashPage {
     fn activate() -> Result<IInspectable> {
-        let page = XamlPage::compose(HashPage)
-            .inspect_err(|err| log::error!("Failed to create a XamlPage: {:?}", err))?;
+        let page = XamlPage::compose(HashPage)?;
 
         Ok(page.into())
     }
@@ -21,13 +20,10 @@ impl Activatable for HashPage {
 
 impl XamlPageOverrides for HashPage {
     fn OnNavigatedFrom(&self, _base: &Page, _args: Option<&NavigationEventArgs>) -> Result<()> {
-        log::debug!("OnNavigatedFrom");
         Ok(())
     }
 
     fn OnNavigatedTo(&self, page: &Page, _args: Option<&NavigationEventArgs>) -> Result<()> {
-        log::debug!("OnNavigatedTo");
-
         let textblock = TextBlock::new()?;
         textblock.SetText(h!("Hi from Hash Page!"))?;
 
@@ -41,13 +37,6 @@ impl XamlPageOverrides for HashPage {
         _base: &Page,
         _args: Option<&NavigatingCancelEventArgs>,
     ) -> Result<()> {
-        log::debug!("OnNavigatingFrom");
         Ok(())
-    }
-}
-
-impl Drop for HashPage {
-    fn drop(&mut self) {
-        log::debug!("HashPage::drop");
     }
 }

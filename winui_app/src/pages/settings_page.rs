@@ -12,8 +12,7 @@ pub struct SettingsPage;
 
 impl Activatable for SettingsPage {
     fn activate() -> Result<IInspectable> {
-        let page = XamlPage::compose(SettingsPage)
-            .inspect_err(|err| log::error!("Failed to create a XamlPage: {:?}", err))?;
+        let page = XamlPage::compose(SettingsPage)?;
 
         Ok(page.into())
     }
@@ -21,13 +20,10 @@ impl Activatable for SettingsPage {
 
 impl XamlPageOverrides for SettingsPage {
     fn OnNavigatedFrom(&self, _base: &Page, _args: Option<&NavigationEventArgs>) -> Result<()> {
-        log::debug!("OnNavigatedFrom");
         Ok(())
     }
 
     fn OnNavigatedTo(&self, page: &Page, _args: Option<&NavigationEventArgs>) -> Result<()> {
-        log::debug!("OnNavigatedTo");
-
         let textblock = TextBlock::new()?;
         textblock.SetText(h!("Hi from Settings Page!"))?;
 
@@ -41,13 +37,6 @@ impl XamlPageOverrides for SettingsPage {
         _base: &Page,
         _args: Option<&NavigatingCancelEventArgs>,
     ) -> Result<()> {
-        log::debug!("OnNavigatingFrom");
         Ok(())
-    }
-}
-
-impl Drop for SettingsPage {
-    fn drop(&mut self) {
-        log::debug!("SettingsPage::drop");
     }
 }

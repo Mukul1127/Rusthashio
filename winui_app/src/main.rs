@@ -1,4 +1,4 @@
-#![windows_subsystem = "console"]
+#![windows_subsystem = "windows"]
 
 mod app;
 mod main_window;
@@ -14,13 +14,12 @@ use windows::{
             PackageDependencyProcessorArchitectures_None, RemovePackageDependency,
             TryCreatePackageDependency,
         },
-        System::WinRT::RO_INIT_SINGLETHREADED,
+        System::WinRT::{RO_INIT_SINGLETHREADED, RoInitialize},
     },
-    core::{HSTRING, IInspectable, Ref, Result, h},
+    core::{HSTRING, Ref, Result, h},
 };
 use winui3::Microsoft::UI::Xaml::{
     Application, ApplicationInitializationCallback, ApplicationInitializationCallbackParams,
-    DispatcherShutdownMode, UnhandledExceptionEventArgs, UnhandledExceptionEventHandler,
 };
 
 use app::App;
@@ -31,11 +30,9 @@ const WINDOWSAPPSDK_RUNTIME_PACKAGE_FRAMEWORK_PACKAGEFAMILYNAME: &HSTRING =
     h!("Microsoft.WindowsAppRuntime.1.7_8wekyb3d8bbwe");
 
 fn main() -> Result<()> {
-    simple_logger::init_with_env().expect("failed to initialize the logger");
-
     // Initialize Apartment
     unsafe {
-        windows::Win32::System::WinRT::RoInitialize(RO_INIT_SINGLETHREADED)?;
+        RoInitialize(RO_INIT_SINGLETHREADED)?;
     }
 
     // Initalize Windows App SDK
@@ -75,47 +72,12 @@ fn main() -> Result<()> {
         DependencyGuard(dependency_context)
     };
 
-    Application::Start(&ApplicationInitializationCallback::new(app_start))?;
-
-    Ok(())
-}
-
-fn app_start(_: Ref<'_, ApplicationInitializationCallbackParams>) -> Result<()> {
-    log::debug!("Application::Start");
-
-    let app = App::create()?;
-    app.SetDispatcherShutdownMode(DispatcherShutdownMode::OnLastWindowClose)?;
-    app.UnhandledException(Some(&UnhandledExceptionEventHandler::new(
-        unhandled_exception_handler,
-    )))?;
-
-    Ok(())
-}
-
-fn unhandled_exception_handler(
-    sender: Ref<'_, IInspectable>,
-    args: Ref<'_, UnhandledExceptionEventArgs>,
-) -> Result<()> {
-    log::debug!("unhandled_exception_handler");
-
-    let sender = sender.as_ref();
-    let args = args.as_ref();
-
-    let sender_name = sender
-        .map(|s| s.GetRuntimeClassName())
-        .transpose()?
-        .map_or_else(|| String::new(), |name| name.to_string_lossy());
-
-    if let Some(args) = args {
-        log::error!(
-            target: &sender_name,
-            "Unhandled exception: {} - {}",
-            args.Exception()?,
-            args.Message()?
-        );
-    } else {
-        log::error!(target: &sender_name, "Unhandled exception occurred");
-    }
+    Application::Start(&ApplicationInitializationCallback::new(
+        |_: Ref<'_, ApplicationInitializationCallbackParams>| -> Result<()> {
+            _ = App::new()?;
+            Ok(())
+        },
+    ))?;
 
     Ok(())
 }

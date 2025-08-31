@@ -18,7 +18,7 @@ pub(crate) struct App {
 }
 
 impl App {
-    pub(crate) fn create() -> Result<Application> {
+    pub(crate) fn new() -> Result<Application> {
         let app = App {
             window: RefCell::new(None),
         };
@@ -28,8 +28,6 @@ impl App {
 
 impl XamlAppOverrides for App {
     fn OnLaunched(&self, base: &Application, _: Option<&LaunchActivatedEventArgs>) -> Result<()> {
-        log::debug!("App::OnLaunched");
-
         let resources = base.Resources()?;
         let merged_dictionaries = resources.MergedDictionaries()?;
         let xaml_controls_resources = XamlControlsResources::new()?;
@@ -50,11 +48,5 @@ impl XamlAppOverrides for App {
             "SettingsPage" => winui3::XamlCustomType::<SettingsPage>::new(full_name),
             _ => Err(windows::core::Error::empty()),
         }
-    }
-}
-
-impl Drop for App {
-    fn drop(&mut self) {
-        log::debug!("App::drop");
     }
 }

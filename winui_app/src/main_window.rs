@@ -122,8 +122,6 @@ impl MainWindow {
                         if *prev != NavigationViewDisplayMode::Minimal
                             && new_mode == NavigationViewDisplayMode::Minimal
                         {
-                            log::debug!("Entered Minimal Mode");
-
                             let xaml = h!(r#"
                                 <DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
                                     <TextBlock
@@ -140,8 +138,6 @@ impl MainWindow {
                         if *prev == NavigationViewDisplayMode::Minimal
                             && new_mode != NavigationViewDisplayMode::Minimal
                         {
-                            log::debug!("Exited Minimal Mode");
-
                             let xaml = h!(r#"
                                 <DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
                                     <TextBlock
